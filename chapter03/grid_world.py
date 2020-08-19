@@ -202,4 +202,4 @@ if __name__ == '__main__':
     figure_3_2()    # 蒙特卡洛法
     figure_3_2_linear_system()  # 线性代数法， 马可夫模型建模， 参考公式（3.14）
 
-    # figure_3_5()
+    figure_3_5()
