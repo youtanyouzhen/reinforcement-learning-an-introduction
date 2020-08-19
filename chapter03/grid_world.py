@@ -151,6 +151,8 @@ def figure_3_2_linear_system():
     A = -1 * np.eye(WORLD_SIZE * WORLD_SIZE) # 当前state的下一个state的value (v_pi(s'))
     b = np.zeros(WORLD_SIZE * WORLD_SIZE)  # 保存当前state的value （v_pi(s) - r*）
 
+    # m马科夫属性是当前步只影响下一步，所以这里只有做一次循环即可
+
     for i in range(WORLD_SIZE):
         for j in range(WORLD_SIZE):
             s = [i, j]  # current state
@@ -197,6 +199,7 @@ def figure_3_5():
 
 
 if __name__ == '__main__':
-    figure_3_2_linear_system()
-    # figure_3_2()
+    figure_3_2()    # 蒙特卡洛法
+    figure_3_2_linear_system()  # 线性代数法， 马可夫模型建模， 参考公式（3.14）
+
     # figure_3_5()
