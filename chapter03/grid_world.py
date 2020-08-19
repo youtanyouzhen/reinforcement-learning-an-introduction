@@ -147,18 +147,25 @@ def figure_3_2_linear_system():
     Here we solve the linear system of equations to find the exact solution.
     We do this by filling the coefficients for each of the states with their respective right side constant.
     '''
-    A = -1 * np.eye(WORLD_SIZE * WORLD_SIZE)
-    b = np.zeros(WORLD_SIZE * WORLD_SIZE)
+    # 参考公式(3.14), 将r移动到左边后的结果
+    A = -1 * np.eye(WORLD_SIZE * WORLD_SIZE) # 当前state的下一个state的value (v_pi(s'))
+    b = np.zeros(WORLD_SIZE * WORLD_SIZE)  # 保存当前state的value （v_pi(s) - r*）
+
     for i in range(WORLD_SIZE):
         for j in range(WORLD_SIZE):
             s = [i, j]  # current state
+
+            # 将矩阵索引s, 转成内存索引index_s（也就是当作一维数组取索引）， 当然还要给出矩阵大小(WORLD_SIZE, WORLD_SIZE)
             index_s = np.ravel_multi_index(s, (WORLD_SIZE, WORLD_SIZE))
+
             for a in ACTIONS:
                 s_, r = step(s, a)
                 index_s_ = np.ravel_multi_index(s_, (WORLD_SIZE, WORLD_SIZE))
 
+                # 参考公式(3.14)，policy 4个概率， 环境很简单，
+                # 当前state等于下一个所有可能state之和
                 A[index_s, index_s_] += ACTION_PROB * DISCOUNT
-                b[index_s] -= ACTION_PROB * r
+                b[index_s] -= ACTION_PROB * r   # 当前
 
     x = np.linalg.solve(A, b)
     draw_image(np.round(x.reshape(WORLD_SIZE, WORLD_SIZE), decimals=2))
@@ -191,5 +198,5 @@ def figure_3_5():
 
 if __name__ == '__main__':
     figure_3_2_linear_system()
-    figure_3_2()
-    figure_3_5()
+    # figure_3_2()
+    # figure_3_5()
