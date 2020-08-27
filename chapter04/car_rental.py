@@ -13,7 +13,7 @@ import numpy as np
 import seaborn as sns
 from scipy.stats import poisson
 
-matplotlib.use('Agg')
+matplotlib.use('Qt5Agg')
 
 # maximum # of cars in each location
 MAX_CARS = 20
@@ -78,11 +78,11 @@ def expected_return(state, action, state_value, constant_returned_cars):
     # cost for moving cars
     returns -= MOVE_CAR_COST * abs(action)
 
-    # moving cars
+    # moving cars （动作， 移动车）
     NUM_OF_CARS_FIRST_LOC = min(state[0] - action, MAX_CARS)
     NUM_OF_CARS_SECOND_LOC = min(state[1] + action, MAX_CARS)
 
-    # go through all possible rental requests
+    # go through all possible rental requests (环境，所有可能返还车的情况)
     for rental_request_first_loc in range(POISSON_UPPER_BOUND):
         for rental_request_second_loc in range(POISSON_UPPER_BOUND):
             # probability for current combination of rental requests
@@ -176,7 +176,7 @@ def figure_4_2(constant_returned_cars=True):
         iterations += 1
 
     plt.savefig('../images/figure_4_2.png')
-    plt.close()
+    plt.show()
 
 
 if __name__ == '__main__':

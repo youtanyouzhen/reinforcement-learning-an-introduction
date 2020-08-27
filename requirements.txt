@@ -3,3 +3,4 @@ matplotlib
 seaborn
 tqdm
 scipy
+PyQt5
