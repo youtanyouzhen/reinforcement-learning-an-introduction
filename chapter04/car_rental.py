@@ -101,7 +101,7 @@ def expected_return(state, action, state_value, constant_returned_cars):
             num_of_cars_first_loc -= valid_rental_first_loc
             num_of_cars_second_loc -= valid_rental_second_loc
 
-            if constant_returned_cars:
+            if constant_returned_cars:  # 由于这里还车是常数，所以还车概率为1
                 # get returned cars, those cars can be used for renting tomorrow
                 returned_cars_first_loc = RETURNS_FIRST_LOC
                 returned_cars_second_loc = RETURNS_SECOND_LOC
@@ -115,15 +115,15 @@ def expected_return(state, action, state_value, constant_returned_cars):
                             returned_cars_first_loc, RETURNS_FIRST_LOC) * poisson_probability(returned_cars_second_loc, RETURNS_SECOND_LOC)
                         num_of_cars_first_loc_ = min(num_of_cars_first_loc + returned_cars_first_loc, MAX_CARS)
                         num_of_cars_second_loc_ = min(num_of_cars_second_loc + returned_cars_second_loc, MAX_CARS)
-                        prob_ = prob_return * prob
+                        prob_ = prob_return * prob # 这里需要两个概率相乘，一个是还车概率，一个是租车概率
                         returns += prob_ * (reward + DISCOUNT *
                                             state_value[num_of_cars_first_loc_, num_of_cars_second_loc_])
     return returns
 
 
 def figure_4_2(constant_returned_cars=True):
-    value = np.zeros((MAX_CARS + 1, MAX_CARS + 1))
-    policy = np.zeros(value.shape, dtype=np.int)
+    value = np.zeros((MAX_CARS + 1, MAX_CARS + 1))      # 每个状态对应一个value
+    policy = np.zeros(value.shape, dtype=np.int)        # 每个状态选定一个动作（不考虑所有可能动作，只考虑最优的动作）
 
     iterations = 0
     _, axes = plt.subplots(2, 3, figsize=(40, 20))
@@ -136,7 +136,7 @@ def figure_4_2(constant_returned_cars=True):
         fig.set_xlabel('# cars at second location', fontsize=30)
         fig.set_title('policy {}'.format(iterations), fontsize=30)
 
-        # policy evaluation (in-place)  这里针对每个状态求出对应的value
+        # policy evaluation (in-place)  这里针对每个状态求出对应的value  （这里给定动作）
         while True:
             old_value = value.copy()
             for i in range(MAX_CARS + 1):
@@ -148,12 +148,13 @@ def figure_4_2(constant_returned_cars=True):
             if max_value_change < 1e-4:
                 break
 
-        # policy improvement  这里针对每个状态求出对应的action
+        # policy improvement  这里针对每个状态求出对应的action  （这里给定value）
         policy_stable = True
         for i in range(MAX_CARS + 1):
             for j in range(MAX_CARS + 1):
                 old_action = policy[i, j]
                 action_returns = []
+                # 分别求每个动作的value
                 for action in actions:
                     if (0 <= action <= i) or (-j <= action <= 0):
                         action_returns.append(expected_return([i, j], action, value, constant_returned_cars))
