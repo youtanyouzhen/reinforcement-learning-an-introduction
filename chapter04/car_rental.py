@@ -136,7 +136,7 @@ def figure_4_2(constant_returned_cars=True):
         fig.set_xlabel('# cars at second location', fontsize=30)
         fig.set_title('policy {}'.format(iterations), fontsize=30)
 
-        # policy evaluation (in-place)
+        # policy evaluation (in-place)  这里针对每个状态求出对应的value
         while True:
             old_value = value.copy()
             for i in range(MAX_CARS + 1):
@@ -144,11 +144,11 @@ def figure_4_2(constant_returned_cars=True):
                     new_state_value = expected_return([i, j], policy[i, j], value, constant_returned_cars)
                     value[i, j] = new_state_value
             max_value_change = abs(old_value - value).max()
-            print('max value change {}'.format(max_value_change))
+            print('max difference of value change {}'.format(max_value_change))
             if max_value_change < 1e-4:
                 break
 
-        # policy improvement
+        # policy improvement  这里针对每个状态求出对应的action
         policy_stable = True
         for i in range(MAX_CARS + 1):
             for j in range(MAX_CARS + 1):
