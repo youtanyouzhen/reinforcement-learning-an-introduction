@@ -10,6 +10,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
+import PyQt5
+
 matplotlib.use('Agg')
 
 # goal
@@ -19,8 +21,7 @@ GOAL = 100
 STATES = np.arange(GOAL + 1)
 
 # probability of head
-HEAD_PROB = 0.4
-
+HEAD_PROB = 0.5
 
 def figure_4_3():
     # state value
@@ -42,8 +43,11 @@ def figure_4_3():
                 action_returns.append(
                     HEAD_PROB * state_value[state + action] + (1 - HEAD_PROB) * state_value[state - action])
             new_value = np.max(action_returns)
+            if new_value>0:
+                new_value=new_value
             state_value[state] = new_value
         delta = abs(state_value - old_state_value).max()
+        print(delta)
         if delta < 1e-9:
             sweeps_history.append(state_value)
             break
@@ -75,7 +79,10 @@ def figure_4_3():
     plt.xlabel('Capital')
     plt.ylabel('Final policy (stake)')
 
-    plt.savefig('../images/figure_4_3.png')
+    plt.savefig('./images/figure_4_3.png')
+    # plt.show()
+    # import os
+    # print(os.getcwd())
     plt.close()
 
 
