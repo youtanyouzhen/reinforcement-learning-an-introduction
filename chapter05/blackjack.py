@@ -179,14 +179,24 @@ def play(policy_player, initial_state=None, initial_action=None):
 
 # Monte Carlo Sample with On-Policy
 def monte_carlo_on_policy(episodes):
+
+    # state value 表格1（针对usable_ace）
     states_usable_ace = np.zeros((10, 10))
     # initialze counts to 1 to avoid 0 being divided
     states_usable_ace_count = np.ones((10, 10))
+
+    # state value 表格2（针对no usable_ace）
     states_no_usable_ace = np.zeros((10, 10))
     # initialze counts to 1 to avoid 0 being divided
     states_no_usable_ace_count = np.ones((10, 10))
+
+
     for i in tqdm(range(0, episodes)):
+
+        # 1 个 episode 
         _, reward, player_trajectory = play(target_policy_player)
+
+        # episode结束后累积reward （以便后面求平均）
         for (usable_ace, player_sum, dealer_card), _ in player_trajectory:
             player_sum -= 12
             dealer_card -= 1
@@ -196,6 +206,8 @@ def monte_carlo_on_policy(episodes):
             else:
                 states_no_usable_ace_count[player_sum, dealer_card] += 1
                 states_no_usable_ace[player_sum, dealer_card] += reward
+    
+    # 估计state value
     return states_usable_ace / states_usable_ace_count, states_no_usable_ace / states_no_usable_ace_count
 
 # Monte Carlo with Exploring Starts
@@ -364,7 +376,7 @@ def figure_5_3():
 
 
 if __name__ == '__main__':
-    # figure_5_1()
-    figure_5_2()
+    figure_5_1()
+    # figure_5_2()
     # figure_5_3()
 
