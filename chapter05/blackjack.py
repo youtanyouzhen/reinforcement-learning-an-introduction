@@ -15,8 +15,8 @@ import seaborn as sns
 from tqdm import tqdm
 
 # actions: hit or stand
-ACTION_HIT = 0
-ACTION_STAND = 1  #  "strike" in the book
+ACTION_HIT = 0  # 拿牌
+ACTION_STAND = 1  #  "strike" in the book， 不拿牌
 ACTIONS = [ACTION_HIT, ACTION_STAND]
 
 # policy for player
@@ -44,13 +44,18 @@ for i in range(17, 22):
     POLICY_DEALER[i] = ACTION_STAND
 
 # get a new card
-def get_card():
+def get_card_1_to_10():
+    """
+    这个改为获取点数更合适
+    获取 1~10的裸点数，不考虑A为11的情况
+    :return:
+    """
     card = np.random.randint(1, 14)
     card = min(card, 10)
     return card
 
 # get the value of a card (11 for ace).
-def card_value(card_id):
+def transform_ace_to_11(card_id):
     return 11 if card_id == 1 else card_id
 
 # play a game
@@ -79,37 +84,37 @@ def play(policy_player, initial_state=None, initial_action=None):
 
         while player_sum < 12:
             # if sum of player is less than 12, always hit
-            card = get_card()
-            player_sum += card_value(card)
+            card = get_card_1_to_10() # 获取 1~10的裸点数，不考虑A为11的情况
+            player_sum += transform_ace_to_11(card)
 
             # If the player's sum is larger than 21, he may hold one or two aces.
             if player_sum > 21:
                 assert player_sum == 22
                 # last card must be ace
-                player_sum -= 10
+                player_sum -= 10   # 将其中一个A转为1
             else:
                 usable_ace_player |= (1 == card)
 
         # initialize cards of dealer, suppose dealer will show the first card he gets
-        dealer_card1 = get_card()
-        dealer_card2 = get_card()
+        dealer_card1 = get_card_1_to_10()
+        dealer_card2 = get_card_1_to_10()
 
     else:
         # use specified initial state
         usable_ace_player, player_sum, dealer_card1 = initial_state
-        dealer_card2 = get_card()
+        dealer_card2 = get_card_1_to_10()
 
     # initial state of the game
     state = [usable_ace_player, player_sum, dealer_card1]
 
-    # initialize dealer's sum
-    dealer_sum = card_value(dealer_card1) + card_value(dealer_card2)
+    # initialize dealer's sum （并且如果有A就转换为11点）
+    dealer_sum = transform_ace_to_11(dealer_card1) + transform_ace_to_11(dealer_card2)
     usable_ace_dealer = 1 in (dealer_card1, dealer_card2)
     # if the dealer's sum is larger than 21, he must hold two aces.
     if dealer_sum > 21:
         assert dealer_sum == 22
         # use one Ace as 1 rather than 11
-        dealer_sum -= 10
+        dealer_sum -= 10  # 将其中一个A转为1
     assert dealer_sum <= 21
     assert player_sum <= 21
 
@@ -127,23 +132,34 @@ def play(policy_player, initial_state=None, initial_action=None):
         # track player's trajectory for importance sampling
         player_trajectory.append([(usable_ace_player, player_sum, dealer_card1), action])
 
+        # 停止要牌
         if action == ACTION_STAND:
             break
+
+        # 要牌
         # if hit, get new card
-        card = get_card()
+        card = get_card_1_to_10()
+
+        # 记录A的个数
         # Keep track of the ace count. the usable_ace_player flag is insufficient alone as it cannot
         # distinguish between having one ace or two.
         ace_count = int(usable_ace_player)
         if card == 1:
             ace_count += 1
-        player_sum += card_value(card)
-        # If the player has a usable ace, use it as 1 to avoid busting and continue.
+
+        # 求和
+        player_sum += transform_ace_to_11(card)
+
+        # 如果超过21点，则把手中的A降为1点
         while player_sum > 21 and ace_count:
             player_sum -= 10
             ace_count -= 1
-        # player busts
+
+        # 超过21点，且没有A，爆点
         if player_sum > 21:
             return state, -1, player_trajectory
+
+        # 小于21点则继续
         assert player_sum <= 21
         usable_ace_player = (ace_count == 1)
 
@@ -151,21 +167,35 @@ def play(policy_player, initial_state=None, initial_action=None):
     while True:
         # get action based on current sum
         action = POLICY_DEALER[dealer_sum]
+
+        # 停止要牌
         if action == ACTION_STAND:
             break
+
+        # 要牌
         # if hit, get a new card
-        new_card = get_card()
+        new_card = get_card_1_to_10()
+
+        # 记录A的个数
         ace_count = int(usable_ace_dealer)
         if new_card == 1:
             ace_count += 1
-        dealer_sum += card_value(new_card)
+
+        # 求和
+        dealer_sum += transform_ace_to_11(new_card)
+
+        # 如果超过21点，则把手中的A降为1点
         # If the dealer has a usable ace, use it as 1 to avoid busting and continue.
         while dealer_sum > 21 and ace_count:
             dealer_sum -= 10
             ace_count -= 1
+
+        # 超过21点，且没有A，爆点
         # dealer busts
         if dealer_sum > 21:
             return state, 1, player_trajectory
+
+        # 小于21点则继续
         usable_ace_dealer = (ace_count == 1)
 
     # compare the sum between player and dealer
@@ -377,6 +407,6 @@ def figure_5_3():
 
 if __name__ == '__main__':
     figure_5_1()
-    # figure_5_2()
+    figure_5_2()
     # figure_5_3()
 
