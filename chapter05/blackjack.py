@@ -283,12 +283,16 @@ def monte_carlo_es(episodes):
 
 # Monte Carlo Sample with Off-Policy
 def monte_carlo_off_policy(episodes):
+
+    # 这个函数用于估计这个状态的value
     initial_state = [True, 13, 2]
 
     rhos = []
     returns = []
 
     for i in range(0, episodes):
+
+        # player_trajectory存放的是状态-动作对
         _, reward, player_trajectory = play(behavior_policy_player, initial_state=initial_state)
 
         # get the importance ratio
@@ -296,9 +300,9 @@ def monte_carlo_off_policy(episodes):
         denominator = 1.0
         for (usable_ace, player_sum, dealer_card), action in player_trajectory:
             if action == target_policy_player(usable_ace, player_sum, dealer_card):
-                denominator *= 0.5
+                denominator *= 0.5  # 伯努利分布，一共两个动作，每个动作0.5的概率
             else:
-                numerator = 0.0
+                numerator = 0.0     # target是确定性规则，概率不是1就是0， 不可能出现的轨迹是永远不会出现的
                 break
         rho = numerator / denominator
         rhos.append(rho)
@@ -381,7 +385,7 @@ def figure_5_2():
     plt.close()
 
 def figure_5_3():
-    true_value = -0.27726
+    true_value = -0.27726 # 状态initial_state = [True, 13, 2] 的真实value
     episodes = 10000
     runs = 100
     error_ordinary = np.zeros(episodes)
@@ -406,7 +410,7 @@ def figure_5_3():
 
 
 if __name__ == '__main__':
-    figure_5_1()
+    # figure_5_1()
     figure_5_2()
     # figure_5_3()
 
