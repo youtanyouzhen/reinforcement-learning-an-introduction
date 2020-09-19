@@ -39,8 +39,9 @@ START = [3, 0]
 GOAL = [3, 7]
 ACTIONS = [ACTION_UP, ACTION_DOWN, ACTION_LEFT, ACTION_RIGHT]
 
+# 这里的风是向下吹的感觉，不过是堆成的，应该没问题
 def step(state, action):
-    i, j = state
+    i, j = state  # i是行的位置，j是列的位置
     if action == ACTION_UP:
         return [max(i - 1 - WIND[j], 0), j]
     elif action == ACTION_DOWN:
@@ -103,7 +104,7 @@ def figure_6_3():
     plt.xlabel('Time steps')
     plt.ylabel('Episodes')
 
-    plt.savefig('../images/figure_6_3.png')
+    plt.savefig('./images/figure_6_3.png')
     plt.close()
 
     # display the optimal policy
