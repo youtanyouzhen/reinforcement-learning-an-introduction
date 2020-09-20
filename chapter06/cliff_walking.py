@@ -107,7 +107,9 @@ def sarsa(q_value, expected=False, step_size=ALPHA):
         else:
             # calculate the expected value of new state
             target = 0.0
-            q_next = q_value[next_state[0], next_state[1], :]
+            q_next = q_value[next_state[0], next_state[1], :]  # 取出当前状态对应的所有action的q值
+
+            # 获取ε-greedy的概率分布 （也就是生成数据和更新数据用的policy一样，所以这里是on-policy）
             best_actions = np.argwhere(q_next == np.max(q_next))
             for action_ in ACTIONS:
                 if action_ in best_actions:
