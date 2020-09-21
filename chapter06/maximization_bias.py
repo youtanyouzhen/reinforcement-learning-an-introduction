@@ -22,6 +22,8 @@ STATE_B = 1
 # use one terminal state
 STATE_TERMINAL = 2
 
+STATE_NAME = ['A', 'B', 'T']
+
 # starts from state A
 STATE_START = STATE_A
 
@@ -64,13 +66,22 @@ def take_action(state, action):
         return 0
     return np.random.normal(-0.1, 1)
 
+def print_q_learning(state, next_state, reward, q_value, left_count, total, A_action):
+    print('='*50)
+    print(f"[{A_action}] {STATE_NAME[state]}->{STATE_NAME[next_state]}, reward: {reward}")
+    print(f"Q(A, left)={q_value[STATE_A][ACTION_A_LEFT]}, Q(A, right)={q_value[STATE_A][ACTION_A_RIGHT]}")
+    print(f"left_count: {left_count}/{total}")
+
 # if there are two state action pair value array, use double Q-Learning
 # otherwise use normal Q-Learning
 def q_learning(q1, q2=None):
     state = STATE_START
     # track the # of action left in state A
     left_count = 0
+    total_count = 0
     while state != STATE_TERMINAL:
+
+        # 选择action
         if q2 is None:
             action = choose_action(state, q1)
         else:
@@ -78,8 +89,12 @@ def q_learning(q1, q2=None):
             action = choose_action(state, [item1 + item2 for item1, item2 in zip(q1, q2)])
         if state == STATE_A and action == ACTION_A_LEFT:
             left_count += 1
+
+        # 执行环境（MDP）
         reward = take_action(state, action)
         next_state = TRANSITION[state][action]
+
+        # 获取下一个state的q值
         if q2 is None:
             active_q = q1
             target = np.max(active_q[next_state])
@@ -96,6 +111,16 @@ def q_learning(q1, q2=None):
         # Q-Learning update
         active_q[state][action] += ALPHA * (
             reward + GAMMA * target - active_q[state][action])
+
+        if q2 is None:
+            A_action = 'other' 
+            if state == STATE_A:
+                total_count += 1
+                A_action = 'left' if action==ACTION_A_LEFT else 'right'
+
+            print_q_learning(state, next_state, reward, q1, left_count, total_count, A_action)
+            total_count = total_count
+        
         state = next_state
     return left_count
 
